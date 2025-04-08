@@ -1,0 +1,14 @@
+.myfields{
+    margin-bottom: 20px;
+}
+
+.item-list{
+    margin-bottom: 20px;
+    border-bottom-color: #ccc !important;
+    border-bottom-width: 1px !important;
+    border-bottom-style: solid !important;
+}
+
+.item-list label{
+    font-weight: bold !important;
+}
