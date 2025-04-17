@@ -1,6 +1,19 @@
 <?php
 
+session_start();
+
 include('admin/connect.php'); 
+
+
+if(!isset($_SESSION['order_id']))
+{
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $query = "insert into orders set ip_address = '$ip'";
+    $result = mysqli_query($conn,$query);
+    $order_id = mysqli_insert_id($conn);
+
+    $_SESSION['order_id'] = $order_id;
+}
 
 
 $query = "select * from home_banners";
@@ -49,23 +62,7 @@ $row = mysqli_fetch_array($result);
                                 <img src="img/logo.png" alt="Venue Logo">
                             </div>
                         </a>
-                        <nav id="primary-nav" class="dropdown cf">
-                            <ul class="dropdown menu">
-                                <?php
-                                $query_cat = "select * from categories";
-                                $result_cat = mysqli_query($conn,$query_cat);
-                                $num_cat = mysqli_num_rows($result_cat);
-                                for($i=0; $i<$num_cat; $i++)
-                                {
-                                $row_cat = mysqli_fetch_array($result_cat);
-
-?>
-                                <li class='active'><a
-                                        href="<?php echo $row_cat['id']; ?>"><?php echo $row_cat['cat_name']; ?></a>
-                                </li>
-                                <?php } ?>
-                            </ul>
-                        </nav><!-- / #primary-nav -->
+                        <?php include('nav.php'); ?>
                     </div>
                 </div>
             </div>
@@ -87,37 +84,39 @@ $row = mysqli_fetch_array($result);
                         </div>
                     </div>
                     <div class="submit-form">
-                        <form id="form-submit" action="" method="get">
+                        <form id="form-submit" action="products.php" method="post">
                             <div class="row">
-                                <div class="col-md-3 first-item">
+                                <div class="col-md-6 first-item">
                                     <fieldset>
-                                        <input name="name" type="text" class="form-control" id="name"
+                                        <input name="search_text" type="text" class="form-control" id="name"
                                             placeholder="Your name..." required="">
                                     </fieldset>
                                 </div>
-                                <div class="col-md-3 second-item">
-                                    <fieldset>
-                                        <input name="location" type="text" class="form-control" id="location"
-                                            placeholder="Type location..." required="">
-                                    </fieldset>
-                                </div>
+
                                 <div class="col-md-3 third-item">
                                     <fieldset>
-                                        <select required name='category' onchange='this.form.()'>
+                                        <select required name='search_category' onchange='this.form.()'>
                                             <option value="">Select category...</option>
-                                            <option value="Shops">Shops</option>
-                                            <option value="Hotels">Hotels</option>
-                                            <option value="Restaurants">Restaurants</option>
-                                            <option value="Events">Events</option>
-                                            <option value="Meetings">Meetings</option>
-                                            <option value="Fitness">Fitness</option>
-                                            <option value="Cafes">Cafes</option>
+                                            <?php
+                                $query_cat = "select * from categories";
+                                $result_cat = mysqli_query($conn,$query_cat);
+                                $num_cat = mysqli_num_rows($result_cat);
+                                for($i=0; $i<$num_cat; $i++)
+                                {
+                                $row_cat = mysqli_fetch_array($result_cat);
+
+     ?>
+                                            <option value="<?php echo $row_cat['id']; ?>">
+                                                <?php echo $row_cat['cat_name']; ?>
+                                            </option>
+                                            <?php } ?>
                                         </select>
                                     </fieldset>
                                 </div>
                                 <div class="col-md-3">
                                     <fieldset>
-                                        <button type="submit" id="form-submit" class="btn">Search Now</button>
+                                        <button type="submit" id="form-submit" name="search_btn" class="btn">Search
+                                            Now</button>
                                     </fieldset>
                                 </div>
                             </div>
@@ -139,186 +138,29 @@ $row = mysqli_fetch_array($result);
                 </div>
             </div>
             <div class="owl-carousel owl-theme">
+                <?php 
+                 $products = "select * from products";
+                 $result = mysqli_query($conn,$products);
+                 $num = mysqli_num_rows($result);
+                 for($i=0; $i<$num; $i++)
+                 {
+                 $row = mysqli_fetch_array($result);                 
+                ?>
                 <div class="item popular-item">
                     <div class="thumb">
-                        <img src="img/popular_item_1.jpg" alt="">
+                        <img src="admin/<?php echo $row['image_1'];?>" alt="">
                         <div class="text-content">
-                            <h4>Mauris tempus</h4>
-                            <span>76 listings</span>
+                            <h4><?php echo $row['title'];?></h4>
+                            <span><?php echo $row['price'];?></span>
                         </div>
                         <div class="plus-button">
-                            <a href="product-details.php"><i class="fa fa-plus"></i></a>
+                            <a href="product-details.php?product_id=<?php echo $row['id'];?>"><i
+                                    class="fa fa-plus"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_2.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Aenean dolor</h4>
-                            <span>18 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_3.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Nunc at quam</h4>
-                            <span>55 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_4.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Fusce ac turpis</h4>
-                            <span>66 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_5.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Lorem ipsum</h4>
-                            <span>82 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_1.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Praesent nec</h4>
-                            <span>76 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_2.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Suspendisse</h4>
-                            <span>36 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_3.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Bibendum</h4>
-                            <span>48 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_4.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Quisque sodales</h4>
-                            <span>66 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_5.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Pellentesque</h4>
-                            <span>85 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_1.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Commodo</h4>
-                            <span>76 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_2.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Adipiscing</h4>
-                            <span>32 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_3.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Etiam hendrerit</h4>
-                            <span>49 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_4.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Suspendisse</h4>
-                            <span>63 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_5.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Sit amet dictum</h4>
-                            <span>86 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
+                <?php }?>
+
             </div>
         </div>
     </section>
@@ -650,8 +492,10 @@ $row = mysqli_fetch_array($result);
 
             <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1197183.8373802372!2d-1.9415093691103689!3d6.781986417238027!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdb96f349e85efd%3A0xb8d1e0b88af1f0f5!2sKumasi+Central+Market!5e0!3m2!1sen!2sth!4v1532967884907"
-                width="100%" height="500px" frameborder="0" style="border:0" allowfullscreen></iframe>
+                width="100%" height="500px" frameborder="0" style="border:0" allowfullscreen>
+            </iframe>
         </div>
+
         <div class="container">
             <div class="col-md-10 col-md-offset-1">
                 <div class="wrapper">

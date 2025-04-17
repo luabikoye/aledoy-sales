@@ -1,11 +1,31 @@
 <?php
+session_start();
 
 include('admin/connect.php'); 
+
+if(!isset($_SESSION['order_id']))
+{
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $query = "insert into orders set ip_address = '$ip'";
+    $result = mysqli_query($conn,$query);
+    $order_id = mysqli_insert_id($conn);
+
+    $_SESSION['order_id'] = $order_id;
+    header("Location: index.php");
+}
+
+
+$product_id = $_GET['product_id'];
 
 
 $query = "select * from home_banners";
 $result = mysqli_query($conn,$query);
 $row = mysqli_fetch_array($result);
+
+
+$query_pr = "select * from products where id = '$product_id'";
+$result_pr = mysqli_query($conn,$query_pr);                
+$row_pr = mysqli_fetch_array($result_pr);  
 
 ?>
 <!DOCTYPE html>
@@ -49,23 +69,7 @@ $row = mysqli_fetch_array($result);
                                 <img src="img/logo.png" alt="Venue Logo">
                             </div>
                         </a>
-                        <nav id="primary-nav" class="dropdown cf">
-                            <ul class="dropdown menu">
-                                <?php
-                                $query_cat = "select * from categories";
-                                $result_cat = mysqli_query($conn,$query_cat);
-                                $num_cat = mysqli_num_rows($result_cat);
-                                for($i=0; $i<$num_cat; $i++)
-                                {
-                                $row_cat = mysqli_fetch_array($result_cat);
-
-?>
-                                <li class='active'><a
-                                        href="<?php echo $row_cat['id']; ?>"><?php echo $row_cat['cat_name']; ?></a>
-                                </li>
-                                <?php } ?>
-                            </ul>
-                        </nav><!-- / #primary-nav -->
+                        <?php include('nav.php'); ?>
                     </div>
                 </div>
             </div>
@@ -149,25 +153,39 @@ $row = mysqli_fetch_array($result);
                     <div class="down-services">
                         <div class="row">
                             <div class="col-md-5 col-md-offset-1">
-                                <div class="left-content">
+                                <form action="proc-cart.php" method="post">
+                                    <div class="left-content">
 
-                                    <img src="img/featured_item_1.jpg">
-                                    <div>
-                                        <br><br>
-                                        Qty : <input type="text">
+
+                                        <img src="admin/<?php echo $row_pr['image_1'];?>">
+                                        <div>
+                                            <br><br>
+                                            Qty : <input type="text" name="qty">
+                                            <input type="hidden" name="product_id" value="<?php echo $product_id;?>">
+                                            <input type="hidden" name="title" value="<?php echo $row_pr['title'];?>">
+                                            <input type="hidden" name="price" value="<?php echo $row_pr['price'];?>">
+                                        </div>
+                                        <div class="blue-button">
+                                            <input type="submit" class="btn btn-primary" value="Buy now">
+                                        </div>
                                     </div>
-                                    <div class="blue-button">
-                                        <a href="#">Buy now</a>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                             <div class="col-md-5">
-                                <h4>In hac habitasse platea dictumst</h4>
+
+                                <?php if($_GET['cart'] == 'success') { ?>
+
+                                <div class="alert alert-success">Paroduct added to cart</div>
+                                <?php } ?>
+                                <h4><?php echo $row_pr['title'];?></h4>
+                                <h2>N <?php echo number_format($row_pr['price']);?></h2>
                                 <p>Aenean hendrerit metus leo, quis viverra purus condimentum nec. Pellentesque a
                                     sem semper, lobortis mauris non, varius urna. Quisque sodales purus eu tellus
                                     fringilla.<br><br>Mauris sit amet quam congue, pulvinar urna et, congue diam.
                                     Suspendisse eu lorem massa. Integer sit amet posuere tellus, id efficitur leo.
                                     In hac habitasse platea dictumst.</p>
+
+                                <a href="javascript:history.back();">Go back</a>
                             </div>
                         </div>
                     </div>
