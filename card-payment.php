@@ -13,8 +13,12 @@ $result = mysqli_query($conn,$query);
 $row = mysqli_fetch_array($result);
 
    
+$type = base64_decode($_GET['type']);
 
 
+$query_order = "select * from orders where id  = '".$_SESSION['order_id']."'";
+$result_order = mysqli_query($conn,$query_order);
+$row_order = mysqli_fetch_array($result_order);
 
 
 ?>
@@ -164,52 +168,17 @@ $row = mysqli_fetch_array($result);
                 </div>
             </div>
 
-            <table align="center" width="600" border=1>
-                <tr>
-                    <th>ID</th>
-                    <th>Image</th>
-                    <th>Product name</th>
-                    <th>Amount</th>
-                    <th>Qty</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                </tr>
-                <?php
-
-                $query_c = "select * from cart where order_id = '".$_SESSION['order_id']."'";
-                 $result_c = mysqli_query($conn,$query_c);
-                 $num_c = mysqli_num_rows($result_c);
-                 for($i=0; $i<$num_c; $i++)
-                 {
-                 $row_c = mysqli_fetch_array($result_c);   
-
-                 ?>
-                <tr>
-                    <td><?php echo $i+1; ?> </td>
-                    <td><?php echo get_image($row_c['product_id']); ?></td>
-                    <td><?php echo $row_c['description'];?></td>
-                    <td><?php echo number_format($row_c['unit_price']);?></td>
-                    <td><?php echo $row_c['quantity'];?></td>
-                    <td><?php echo number_format($row_c['total_price']);?></td>
-                    <td><a href="del-cart.php?id=<?php echo $row_c['id'];?>"
-                            onclick="return confirm('Are you sure?');">Remove</a></td>
-                </tr>
-                <?php } ?>
-
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td style="color:red"><b><?php echo number_format(total_cart(),2); ?></b></td>
-                </tr>
-            </table>
-
             <center>
-                <br><br>
-                <a href="checkout.php" class="btn btn-success">Proceed to Checkout </a>
+                <h2>You are about to make a payment of <?php echo number_format(total_cart()); ?>
+
+                </h2>
+                <form action="proc-payment.php" method="POST">
+                    <input type="hidden" name="user_email" value="<?php echo $row_order['email']; ?>">
+                    <input type="hidden" name="amount" value="<?php echo $row_order['amount']; ?>">
+                    <input type="hidden" name="cartid" value="<?php echo $row_order['id']; ?>">
+                    <button type="submit" name="pay_now" id="pay-now" title="Pay now">Pay now</button>
+                </form>
+
             </center>
         </div>
     </section>

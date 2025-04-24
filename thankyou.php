@@ -13,9 +13,13 @@ $result = mysqli_query($conn,$query);
 $row = mysqli_fetch_array($result);
 
    
+$type = base64_decode($_GET['type']);
 
-
-
+if($type == 'Card')
+{
+    $query_order = "update orders set payment_status = 'Paid' where id  = '".$_SESSION['order_id']."'";
+    $result_order = mysqli_query($conn,$query_order);
+}
 
 ?>
 <!DOCTYPE html>
@@ -164,52 +168,18 @@ $row = mysqli_fetch_array($result);
                 </div>
             </div>
 
-            <table align="center" width="600" border=1>
-                <tr>
-                    <th>ID</th>
-                    <th>Image</th>
-                    <th>Product name</th>
-                    <th>Amount</th>
-                    <th>Qty</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                </tr>
-                <?php
-
-                $query_c = "select * from cart where order_id = '".$_SESSION['order_id']."'";
-                 $result_c = mysqli_query($conn,$query_c);
-                 $num_c = mysqli_num_rows($result_c);
-                 for($i=0; $i<$num_c; $i++)
-                 {
-                 $row_c = mysqli_fetch_array($result_c);   
-
-                 ?>
-                <tr>
-                    <td><?php echo $i+1; ?> </td>
-                    <td><?php echo get_image($row_c['product_id']); ?></td>
-                    <td><?php echo $row_c['description'];?></td>
-                    <td><?php echo number_format($row_c['unit_price']);?></td>
-                    <td><?php echo $row_c['quantity'];?></td>
-                    <td><?php echo number_format($row_c['total_price']);?></td>
-                    <td><a href="del-cart.php?id=<?php echo $row_c['id'];?>"
-                            onclick="return confirm('Are you sure?');">Remove</a></td>
-                </tr>
-                <?php } ?>
-
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td style="color:red"><b><?php echo number_format(total_cart(),2); ?></b></td>
-                </tr>
-            </table>
-
             <center>
-                <br><br>
-                <a href="checkout.php" class="btn btn-success">Proceed to Checkout </a>
+                <h2>Thank you for your order </h2>
+                <?php if($type == 'Bank') { ?>
+                Kindly make payment to :<br>
+                GTB 1002830948904 - Aledoy fashion<br>
+
+                Once payment is made; please send eveident to: order@aledoy.com
+                <?php } else { ?>
+
+                Our logistics team will reach out to you on the day of delivery. Which should not be more than 48 hours
+
+                <?php } ?>
             </center>
         </div>
     </section>
@@ -487,3 +457,9 @@ $row = mysqli_fetch_array($result);
 </body>
 
 </html>
+
+<?php 
+
+unset($_SESSION['order_id']);
+session_destroy();
+?>

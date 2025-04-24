@@ -2,7 +2,6 @@
 session_start();
 
 include('admin/connect.php'); 
-require_once('fns.php');
 
 $cat_id = $_GET['catid'];
 $search_text = $_POST['search_text'];
@@ -12,9 +11,27 @@ $query = "select * from home_banners";
 $result = mysqli_query($conn,$query);
 $row = mysqli_fetch_array($result);
 
+function get_image($product_id)
+{
+    global $conn;
+    
+    $query = "select * from products where id = '$product_id'";
+    $result = mysqli_query($conn,$query);
+    $row = mysqli_fetch_array($result);
+    return '<img src="admin/'.$row['image_1'].'" alt="" style="height:80px;">';
+}
    
 
-
+function total_cart()
+{
+    global $conn;
+    
+    $query = "select sum(total_price) from cart where order_id = '".$_SESSION['order_id']."'";
+    $result = mysqli_query($conn,$query);
+    $row = mysqli_fetch_array($result);
+    return $row[0];
+}
+   
 
 
 ?>
@@ -44,6 +61,11 @@ $row = mysqli_fetch_array($result);
 	Venue Template
 	http://www.templatemo.com/tm-522-venue
 -->
+    <style>
+    .form-data {
+        margin-top: 30px;
+    }
+    </style>
 </head>
 
 <body>
@@ -164,53 +186,55 @@ $row = mysqli_fetch_array($result);
                 </div>
             </div>
 
-            <table align="center" width="600" border=1>
-                <tr>
-                    <th>ID</th>
-                    <th>Image</th>
-                    <th>Product name</th>
-                    <th>Amount</th>
-                    <th>Qty</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                </tr>
-                <?php
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                    <form action="pay.php" method="post">
+                        <div class="form-data">
+                            <label>Firstname</label>
+                            <input type="text" class="form-control" name="firstname">
+                        </div>
+                        <div class="form-data">
+                            <label>Lastname</label>
+                            <input type="text" class="form-control" name="lastname">
+                        </div>
+                        <div class="form-data">
+                            <label>Email</label>
+                            <input type="text" class="form-control" name="email">
+                        </div>
+                        <div class="form-data">
+                            <label>Phone</label>
+                            <input type="text" class="form-control" name="phone">
+                        </div>
+                        <div class="form-data">
+                            <label>Address</label>
+                            <input type="text" class="form-control" name="address">
+                        </div>
+                        <div class="form-data">
+                            <label>City</label>
+                            <input type="text" class="form-control" name="city">
+                        </div>
+                        <div class="form-data">
+                            <label>State</label>
+                            <input type="text" class="form-control" name="state">
+                        </div>
+                        <div class="form-data">
+                            <label>Payment Type</label><br>
+                            <input type="radio" value="Bank" name="payment_type"> Bank Transfer
+                            <input type="radio" value="Cash" name="payment_type" style="margin-left:20px;"> Cash on
+                            Delivery
+                            <input type="radio" value="Card" name="payment_type" style="margin-left:20px;"> Debit
+                            Card
+                        </div>
 
-                $query_c = "select * from cart where order_id = '".$_SESSION['order_id']."'";
-                 $result_c = mysqli_query($conn,$query_c);
-                 $num_c = mysqli_num_rows($result_c);
-                 for($i=0; $i<$num_c; $i++)
-                 {
-                 $row_c = mysqli_fetch_array($result_c);   
+                        <div class="form-data">
+                            <input type="submit" class="btn btn-success" name="btn_sub">
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-3"></div>
+            </div>
 
-                 ?>
-                <tr>
-                    <td><?php echo $i+1; ?> </td>
-                    <td><?php echo get_image($row_c['product_id']); ?></td>
-                    <td><?php echo $row_c['description'];?></td>
-                    <td><?php echo number_format($row_c['unit_price']);?></td>
-                    <td><?php echo $row_c['quantity'];?></td>
-                    <td><?php echo number_format($row_c['total_price']);?></td>
-                    <td><a href="del-cart.php?id=<?php echo $row_c['id'];?>"
-                            onclick="return confirm('Are you sure?');">Remove</a></td>
-                </tr>
-                <?php } ?>
-
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td style="color:red"><b><?php echo number_format(total_cart(),2); ?></b></td>
-                </tr>
-            </table>
-
-            <center>
-                <br><br>
-                <a href="checkout.php" class="btn btn-success">Proceed to Checkout </a>
-            </center>
         </div>
     </section>
 
