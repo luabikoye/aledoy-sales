@@ -678,9 +678,3 @@ $row = mysqli_fetch_array($result);
 </body>
 
 </html>
-
-<?php 
-
-unset($_SESSION['order_id']);
-session_destroy();
-?>

@@ -11,7 +11,7 @@ $search_category = $_POST['search_category'];
 $query = "select * from home_banners";
 $result = mysqli_query($conn,$query);
 $row = mysqli_fetch_array($result);
-
+1
    
 $type = base64_decode($_GET['type']);
 

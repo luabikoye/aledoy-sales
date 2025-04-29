@@ -172,7 +172,7 @@ $row_order = mysqli_fetch_array($result_order);
                 <h2>You are about to make a payment of <?php echo number_format(total_cart()); ?>
 
                 </h2>
-                <form id="paymentForm" method="post" action="proc-payment.php">
+                <form id="paymentForm">
                     <input type="hidden" id="email-address" name="user_email" value="<?php echo $row_order['email']; ?>">
                     <input type="hidden" id="amount" name="amount" value="<?php echo $row_order['amount']; ?>">
                     <input type="hidden" name="cartid" value="<?php echo $row_order['id']; ?>" id="orderid">
@@ -479,7 +479,7 @@ $row_order = mysqli_fetch_array($result_order);
             callback: function(response) {
                 let message = 'Payment complete! Reference: ' + response.reference;
                 alert(message);
-                document.location.href = 'index.php';
+                document.location.href = 'thankyou.php?type=<?php echo base64_encode('Card'); ?>'
             }
         });
 
