@@ -1,13 +1,40 @@
 <?php
+session_start();
 
 include('admin/connect.php'); 
+
+if(!isset($_SESSION['order_id']))
+{
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $query = "insert into orders set ip_address = '$ip'";
+    $result = mysqli_query($conn,$query);
+    $order_id = mysqli_insert_id($conn);
+
+    $_SESSION['order_id'] = $order_id;
+    header("Location: index.php");
+}
+
+$product_id = $_GET['product_id'];
 
 
 $query = "select * from home_banners";
 $result = mysqli_query($conn,$query);
 $row = mysqli_fetch_array($result);
 
+
+$id = $_GET['id'];
+$price = $_GET['price'];
+
+$product = "select * from products where id = $id ";
+$result = mysqli_query($conn,$product);
+$product_row = mysqli_fetch_array($result);
+$query_pr = "select * from products where id = '$product_id'";
+$result_pr = mysqli_query($conn,$query_pr);                
+$row_pr = mysqli_fetch_array($result_pr);  
+
 ?>
+
+
 <!DOCTYPE html>
 <html>
 
@@ -49,23 +76,7 @@ $row = mysqli_fetch_array($result);
                                 <img src="img/logo.png" alt="Venue Logo">
                             </div>
                         </a>
-                        <nav id="primary-nav" class="dropdown cf">
-                            <ul class="dropdown menu">
-                                <?php
-                                $query_cat = "select * from categories";
-                                $result_cat = mysqli_query($conn,$query_cat);
-                                $num_cat = mysqli_num_rows($result_cat);
-                                for($i=0; $i<$num_cat; $i++)
-                                {
-                                $row_cat = mysqli_fetch_array($result_cat);
-
-?>
-                                <li class='active'><a
-                                        href="<?php echo $row_cat['id']; ?>"><?php echo $row_cat['cat_name']; ?></a>
-                                </li>
-                                <?php } ?>
-                            </ul>
-                        </nav><!-- / #primary-nav -->
+                     <?php include('nav.php') ?>
                     </div>
                 </div>
             </div>
@@ -87,31 +98,75 @@ $row = mysqli_fetch_array($result);
                         </div>
                     </div>
                     <div class="submit-form">
-                        <form id="form-submit" action="" method="get">
+                        <form id="form-submit" action="search-products.php" method="post">
                             <div class="row">
                                 <div class="col-md-3 first-item">
                                     <fieldset>
+                                         <?php 
+                                          $cat1 = "SELECT * FROM products";
+                                          $result_cat1 = mysqli_query($conn,$cat1);
+                                          $num_cat1 = mysqli_num_rows($result_cat1);
+                                          for ($i=0; $i < $num_cat; $i++) { 
+                                           $row_cat1 = mysqli_fetch_array($result_cat1);         
+                                          ?>
+
+                                          <?php } ?>
                                         <input name="name" type="text" class="form-control" id="name"
-                                            placeholder="Your name..." required="">
+                                            placeholder="Your name...">
                                     </fieldset>
                                 </div>
                                 <div class="col-md-3 second-item">
                                     <fieldset>
-                                        <input name="location" type="text" class="form-control" id="location"
-                                            placeholder="Type location..." required="">
+
+                                     <?php 
+                                        
+$price = $_POST['price'] ?? 'all';
+
+if ($price == 'all') {
+    $query = "SELECT * FROM products";
+} else {
+    // Remove commas
+    $price_clean = str_replace(',', '', $price);
+
+    // Split by dash to get min and max
+    list($min, $max) = explode('-', $price_clean);
+
+    // Trim any extra spaces just in case
+    $min = trim($min);
+    $max = trim($max);
+
+       echo "Min: $min, Max: $max<br>";
+
+       
+    // Use the values in the SQL query
+    $query = "SELECT * FROM products WHERE price BETWEEN $min AND $max";
+    $result_products = mysqli_query($conn, $query);
+}
+
+ ?>
+ 
+                                            <select name="price" id="price" onchange='this.form.submit()'>
+                                               <option value="all">All Prices</option>
+                                               <option value="0-10000">Below ₦10,000</option>
+                                               <option value="10000-20000">₦10,000 - ₦20,000</option>
+                                               <option value="20000-1000000">Above ₦20,000</option>
+                                            </select>
                                     </fieldset>
                                 </div>
                                 <div class="col-md-3 third-item">
                                     <fieldset>
-                                        <select required name='category' onchange='this.form.()'>
+                                        <select  name='category' onchange='this.form.()'>
                                             <option value="">Select category...</option>
-                                            <option value="Shops">Shops</option>
-                                            <option value="Hotels">Hotels</option>
-                                            <option value="Restaurants">Restaurants</option>
-                                            <option value="Events">Events</option>
-                                            <option value="Meetings">Meetings</option>
-                                            <option value="Fitness">Fitness</option>
-                                            <option value="Cafes">Cafes</option>
+                                           <?php 
+                                           $cat = "SELECT * FROM categories";
+                                           $result_cat = mysqli_query($conn,$cat);
+                                           $num_cat = mysqli_num_rows($result_cat);
+                                           for ($i=0; $i < $num_cat; $i++) { 
+                                            $row_cat = mysqli_fetch_array($result_cat);         
+                                           ?>
+                                            <option value="<?= $row_cat['id']?>"><?= $row_cat['cat_name']?> </option>
+
+                                            <?php } ?>
                                         </select>
                                     </fieldset>
                                 </div>
@@ -146,29 +201,59 @@ $row = mysqli_fetch_array($result);
 
             <div class="row">
                 <div class="col-md-12">
+                      <!-- <?php
+
+    $product_id = $_GET['id'];
+   
+     $query_product = "SELECT * FROM products WHERE id = $product_id";
+     echo "Running query: " . $query_product . "<br>"; //
+    $result_product = mysqli_query($conn, $query_product);
+     if (mysqli_num_rows($result_product) > 0)
+   {
+        $row_pr = mysqli_fetch_array($result_product);
+
+?> -->
                     <div class="down-services">
                         <div class="row">
                             <div class="col-md-5 col-md-offset-1">
+                                 <form action="proc-cart.php" method="post">
                                 <div class="left-content">
 
-                                    <img src="img/featured_item_1.jpg">
+                                  <img src="admin/<?php echo($row_pr['image_1']); ?>" alt="<?php echo ($row_pr['title']); ?>">
                                     <div>
                                         <br><br>
-                                        Qty : <input type="text">
+                                       <h4><?php echo ($row_pr['title']); ?><h4>  
+                                    </div>
+                                    <div>
+                                        <label for="qty">qty</label>
+                                        <input type="text" name="qty">
+                                         <input type="" name="product_id" value="<?php echo $product_id;?>">
+                                            <input type="" name="title" value="<?php echo $row_pr['title'];?>">
+                                            <input type="" name="price" value="<?php echo $row_pr['price'];?>">
                                     </div>
                                     <div class="blue-button">
-                                        <a href="#">Buy now</a>
+                                         <input type="submit" class="btn btn-primary" value="Buy now">
                                     </div>
                                 </div>
+   </form>
                             </div>
                             <div class="col-md-5">
-                                <h4>In hac habitasse platea dictumst</h4>
-                                <p>Aenean hendrerit metus leo, quis viverra purus condimentum nec. Pellentesque a
-                                    sem semper, lobortis mauris non, varius urna. Quisque sodales purus eu tellus
-                                    fringilla.<br><br>Mauris sit amet quam congue, pulvinar urna et, congue diam.
-                                    Suspendisse eu lorem massa. Integer sit amet posuere tellus, id efficitur leo.
-                                    In hac habitasse platea dictumst.</p>
+                                N<?php echo number_format($row_pr['price']); ?>
+                                <a href="product-details.php?id=<?php echo $row_pr['id']; ?>"> <button class="btn-secondary">Add to Cart</button>
+                                    </a>
+
+                                     <?php if($_GET['cart'] == 'success') { ?>
+
+                                <div class="alert alert-success">Paroduct added to cart</div>
+                                <?php } ?>
+                                <h4><?php echo $row_pr['title'];?></h4>
+                                <h2>N <?php echo number_format($row_pr['price']);?></h2>
                             </div>
+                            <?php } else {
+            // If no products found in the category
+            echo "No products found for this category.";
+        } ?>
+                            
                         </div>
                     </div>
                 </div>

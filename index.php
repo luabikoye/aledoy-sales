@@ -1,7 +1,32 @@
 <?php
+session_start();
 
 include('admin/connect.php'); 
 
+
+if(!isset($_SESSION['order_id']))
+{
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $query = "insert into orders set ip_address = '$ip'";
+    $result = mysqli_query($conn,$query);
+    $order_id = mysqli_insert_id($conn);
+
+      $_SESSION['order_id'] = $order_id;
+
+}
+
+    else {
+    $order_id = $_SESSION['order_id'];
+    $query = "UPDATE orders SET date_time = NOW() WHERE id = $order_id AND date_time IS NULL";
+    $result = mysqli_query($conn, $query);
+    }
+
+  
+
+
+
+$search_text = $_POST['search_text'];
+$search_category = $_POST['search_category'];
 
 $query = "select * from home_banners";
 $result = mysqli_query($conn,$query);
@@ -49,23 +74,7 @@ $row = mysqli_fetch_array($result);
                                 <img src="img/logo.png" alt="Venue Logo">
                             </div>
                         </a>
-                        <nav id="primary-nav" class="dropdown cf">
-                            <ul class="dropdown menu">
-                                <?php
-                                $query_cat = "select * from categories";
-                                $result_cat = mysqli_query($conn,$query_cat);
-                                $num_cat = mysqli_num_rows($result_cat);
-                                for($i=0; $i<$num_cat; $i++)
-                                {
-                                $row_cat = mysqli_fetch_array($result_cat);
-
-?>
-                                <li class='active'><a
-                                        href="<?php echo $row_cat['id']; ?>"><?php echo $row_cat['cat_name']; ?></a>
-                                </li>
-                                <?php } ?>
-                            </ul>
-                        </nav><!-- / #primary-nav -->
+                     <?php include('nav.php') ?>
                     </div>
                 </div>
             </div>
@@ -87,37 +96,43 @@ $row = mysqli_fetch_array($result);
                         </div>
                     </div>
                     <div class="submit-form">
-                        <form id="form-submit" action="" method="get">
+                        <form id="form-submit" action="search-products.php" method="post">
                             <div class="row">
                                 <div class="col-md-3 first-item">
                                     <fieldset>
+                                        <?php 
+                                          $cat1 = "SELECT * FROM products";
+                                          $result_cat1 = mysqli_query($conn,$cat1);
+                                          $num_cat1 = mysqli_num_rows($result_cat1);
+                                          for ($i=0; $i < $num_cat; $i++) { 
+                                           $row_cat1 = mysqli_fetch_array($result_cat1);         
+                                          ?>
+                                        
+                                          <?php }?>
                                         <input name="name" type="text" class="form-control" id="name"
-                                            placeholder="Your name..." required="">
+                                            placeholder="Your name...">
                                     </fieldset>
                                 </div>
-                                <div class="col-md-3 second-item">
-                                    <fieldset>
-                                        <input name="location" type="text" class="form-control" id="location"
-                                            placeholder="Type location..." required="">
-                                    </fieldset>
-                                </div>
+
                                 <div class="col-md-3 third-item">
                                     <fieldset>
-                                        <select required name='category' onchange='this.form.()'>
-                                            <option value="">Select category...</option>
-                                            <option value="Shops">Shops</option>
-                                            <option value="Hotels">Hotels</option>
-                                            <option value="Restaurants">Restaurants</option>
-                                            <option value="Events">Events</option>
-                                            <option value="Meetings">Meetings</option>
-                                            <option value="Fitness">Fitness</option>
-                                            <option value="Cafes">Cafes</option>
+                                        <select name='category' onchange='this.form.()'>
+                                            <option value="">Choose Category</option>
+                                           <?php 
+                                           $cat = "SELECT * FROM categories";
+                                           $result_cat = mysqli_query($conn,$cat);
+                                           $num_cat = mysqli_num_rows($result_cat);
+                                           for ($i=0; $i < $num_cat; $i++) { 
+                                            $row_cat = mysqli_fetch_array($result_cat);         
+                                           ?>
+                                           <option value="<?= $row_cat['id']?>"><?= $row_cat['cat_name']?></option>
+                                           <?php }?>
                                         </select>
                                     </fieldset>
                                 </div>
                                 <div class="col-md-3">
                                     <fieldset>
-                                        <button type="submit" id="form-submit" class="btn">Search Now</button>
+                                  <button id="form-submit" class="btn">Search Now</button>
                                     </fieldset>
                                 </div>
                             </div>
@@ -128,200 +143,45 @@ $row = mysqli_fetch_array($result);
         </div>
     </section>
 
-    <section class="popular-places" id="popular">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="section-heading">
-                        <span>Popular Places</span>
-                        <h2>Integer sapien odio</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="owl-carousel owl-theme">
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_1.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Mauris tempus</h4>
-                            <span>76 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="product-details.php"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_2.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Aenean dolor</h4>
-                            <span>18 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_3.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Nunc at quam</h4>
-                            <span>55 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_4.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Fusce ac turpis</h4>
-                            <span>66 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_5.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Lorem ipsum</h4>
-                            <span>82 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_1.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Praesent nec</h4>
-                            <span>76 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_2.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Suspendisse</h4>
-                            <span>36 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_3.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Bibendum</h4>
-                            <span>48 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_4.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Quisque sodales</h4>
-                            <span>66 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_5.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Pellentesque</h4>
-                            <span>85 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_1.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Commodo</h4>
-                            <span>76 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_2.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Adipiscing</h4>
-                            <span>32 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_3.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Etiam hendrerit</h4>
-                            <span>49 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_4.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Suspendisse</h4>
-                            <span>63 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="item popular-item">
-                    <div class="thumb">
-                        <img src="img/popular_item_5.jpg" alt="">
-                        <div class="text-content">
-                            <h4>Sit amet dictum</h4>
-                            <span>86 listings</span>
-                        </div>
-                        <div class="plus-button">
-                            <a href="#"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
+   <section class="popular-places" id="popular">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="section-heading">
+                     <span>Category -> <?php echo $search_text; ?></span>
+                    <h2>Integer sapien odio</h2>
                 </div>
             </div>
         </div>
-    </section>
+        <div class="owl-carousel owl-theme">
+            <?php
+            
+            $query_product = "SELECT * FROM products";
+            $result_product = mysqli_query($conn, $query_product);
+                 
+            
+            if (!$result_product) {
+                echo("Database query failed: " . mysqli_error($conn));
+            }
+            
+            while ($row_product = mysqli_fetch_assoc($result_product)) {
+            ?>
+            <div class="item popular-item">
+                <div class="thumb">
+                    <img src="admin/<?php echo ($row_product['image_1']); ?>" alt="<?php echo ($row_product['title']); ?>">
+                    <div class="text-content">
+                        <h4><?php echo ($row_product['title']); ?></h4>
+                        <span><?php echo number_format($row_product['price'], 2); ?></span>
+                    </div>
+                    <div class="plus-button">
+                        <a href="product-details.php?id=<?php echo $row_product['id']; ?>"><i class="fa fa-plus"></i></a>
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+    </div>
+</section>
 
 
 
@@ -818,3 +678,9 @@ $row = mysqli_fetch_array($result);
 </body>
 
 </html>
+
+<?php 
+
+unset($_SESSION['order_id']);
+session_destroy();
+?>

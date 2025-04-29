@@ -1,6 +1,6 @@
 <?php
 
-$conn = mysqli_connect('localhost','aledoy_sales','certification231','aledoy_sales');
+$conn = mysqli_connect('localhost','aledoy_sales','certification','aledoy_sales');
 
 if(!$conn)
 {
